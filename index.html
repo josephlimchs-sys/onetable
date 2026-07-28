@@ -15,7 +15,7 @@
     --chinese:#E15241;
     --malay:#3FA06B;
     --indian:#E3A93B;
-    --bg: var(--chinese);
+    --bg: #1D1712;
     --ease: cubic-bezier(.22,1,.36,1);
     --ease-float: cubic-bezier(.34,1.56,.64,1);
   }
@@ -40,11 +40,13 @@
   .mono{ font-family:'Space Mono', monospace; }
   a{ color:inherit; text-decoration:none; }
 
-  /* ---------- radial color-wipe transition ---------- */
-  .wipe{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    clip-path:circle(0px at 50% 50%);
+  /* ---------- home background photo ---------- */
+  .home-bg{
+    position:fixed; inset:0; z-index:0; opacity:0; pointer-events:none;
+    background:linear-gradient(rgba(20,15,10,.55), rgba(20,15,10,.82)), url('assets/hero-bg.jpg') center/cover no-repeat;
+    transition:opacity .6s var(--ease);
   }
+  .home-bg.active{ opacity:1; }
 
   /* ---------- entrance stagger ---------- */
   .reveal{ opacity:0; transform:translateY(22px); transition:opacity .8s var(--ease), transform .8s var(--ease); }
@@ -157,7 +159,7 @@
 </head>
 <body>
 
-<div class="wipe" id="wipe"></div>
+<div class="home-bg active" id="home-bg"></div>
 
 <nav class="reveal" id="reveal-nav">
   <div class="nav-logo">ONE TABLE</div>
@@ -268,15 +270,14 @@ const data = {
   malay:   { color:'#3FA06B', word:'Nasi lemak',   stall:'STALL 11 · MALAY',   desc:'Coconut rice, crisp ikan bilis, roasted peanuts, sambal on the side.', price:'$3.80' },
   indian:  { color:'#E3A93B', word:'Roti prata',   stall:'STALL 19 · INDIAN',  desc:'Dough stretched paper-thin, torn by hand, dipped in curry gravy.', price:'$2.20' }
 };
-const root = document.documentElement;
 const stallTag = document.getElementById('stall-tag');
 const desc = document.getElementById('desc');
 const priceEl = document.getElementById('price');
-const wipe = document.getElementById('wipe');
 const indicator = document.getElementById('tab-indicator');
 const tabsWrap = document.querySelector('.flavor-tabs');
 const homeView = document.getElementById('home-view');
 const dishView = document.getElementById('dish-view');
+const homeBg = document.getElementById('home-bg');
 const footRow = document.getElementById('reveal-foot');
 
 function moveIndicator(tabEl){
@@ -303,6 +304,7 @@ function applyDishContent(key){
   });
 
   homeView.classList.toggle('active', isHome);
+  homeBg.classList.toggle('active', isHome);
   dishView.classList.toggle('active', !isHome);
   footRow.classList.toggle('home-mode', isHome);
 
@@ -319,34 +321,8 @@ function applyDishContent(key){
   }
 }
 
-function setDish(key, originEl){
-  const d = data[key];
-  const fallback = document.querySelector('.flavor-tab.active') || document.querySelector('.nav-logo');
-  const rect = (originEl || fallback).getBoundingClientRect();
-  const ox = rect.left + rect.width/2;
-  const oy = rect.top + rect.height/2;
-  const radius = Math.hypot(
-    Math.max(ox, window.innerWidth - ox),
-    Math.max(oy, window.innerHeight - oy)
-  ) * 1.05;
-
-  wipe.style.transition = 'none';
-  wipe.style.background = d.color;
-  wipe.style.clipPath = `circle(0px at ${ox}px ${oy}px)`;
-  // eslint-disable-next-line no-unused-expressions
-  wipe.offsetHeight;
-  wipe.style.transition = 'clip-path .7s var(--ease)';
-  requestAnimationFrame(()=>{
-    wipe.style.clipPath = `circle(${radius}px at ${ox}px ${oy}px)`;
-  });
-
-  setTimeout(()=> applyDishContent(key), 280);
-
-  setTimeout(()=>{
-    root.style.setProperty('--bg', d.color);
-    wipe.style.transition = 'none';
-    wipe.style.clipPath = `circle(0px at ${ox}px ${oy}px)`;
-  }, 720);
+function setDish(key){
+  applyDishContent(key);
 }
 
 document.querySelectorAll('.flavor-tab, .pill').forEach(btn=>{
@@ -378,8 +354,7 @@ window.addEventListener('wheel', (e)=>{
   setTimeout(()=>{ scrollLocked = false; }, 900);
 }, { passive:false });
 
-/* initial state (no wipe on load) */
-root.style.setProperty('--bg', data.home.color);
+/* initial state */
 applyDishContent('home');
 window.addEventListener('resize', ()=>{
   const activeTab = document.querySelector('.flavor-tab.active');
