@@ -1,6 +1,6 @@
 # One Table — a Singapore hawker showcase (mockup)
 
-Single-page static site: `index.html` + `assets/` (three real dish photos). Click **Chinese / Malay / Indian** in the nav and the whole page morphs — background color, giant background word, dish photo, and floating ingredient icons all switch together, styled after a Fruity/soda-brand product-tab pattern. No build step, no framework — vanilla HTML/CSS/JS using the Web Animations API for the idle float and parallax.
+Single-page static site: `index.html` + `assets/` (three real dish photos, transparent PNGs). Click **Chinese / Malay / Indian** in the nav and the whole page morphs — background color (via a radial wipe transition), giant background word, dish photo, and floating ingredient icons all switch together, styled after a Fruity/soda-brand product-tab pattern. Extra motion layer: sliding tab indicator, cursor-tilt on the dish photo, wiggling ingredients, magnetic/ripple CTA, staggered page-load entrance. No build step, no framework — vanilla HTML/CSS/JS using the Web Animations API and requestAnimationFrame.
 
 ## Deploy to Vercel (pick one)
 
