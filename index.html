@@ -359,12 +359,31 @@ function attemptSwitch(goingDown){
   orderIndex = nextIndex;
   setDish(order[orderIndex]);
 
-  setTimeout(()=>{ scrollLocked = false; }, 1700);
+  setTimeout(()=>{ scrollLocked = false; }, 400);
 }
+
+/* Wheel events fire very differently per device: a standard mouse sends one
+   isolated event per notch, but a trackpad sends dozens of small events over
+   ~400-800ms for a single physical swipe. A flat cooldown can't satisfy both —
+   too short and one trackpad swipe cascades through several dishes; too long
+   and separate mouse-wheel notches feel unresponsive. Instead, accumulate
+   deltaY within a continuous gesture (a gap of ~160ms with no wheel events
+   means the gesture ended) and only trigger once per gesture. */
+let wheelAccum = 0;
+let wheelGestureTimer = null;
+let wheelGestureActive = false;
 
 window.addEventListener('wheel', (e)=>{
   e.preventDefault();
-  attemptSwitch(e.deltaY > 0);
+  clearTimeout(wheelGestureTimer);
+  wheelGestureTimer = setTimeout(()=>{ wheelAccum = 0; wheelGestureActive = false; }, 160);
+
+  if (wheelGestureActive) return;
+  wheelAccum += e.deltaY;
+  if (Math.abs(wheelAccum) > 35){
+    wheelGestureActive = true;
+    attemptSwitch(wheelAccum > 0);
+  }
 }, { passive:false });
 
 /* touch devices don't fire wheel events at all, so a vertical swipe
