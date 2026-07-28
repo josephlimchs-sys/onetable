@@ -107,13 +107,24 @@
   .home-scroll-cue .chevron{ font-size:16px; animation:bounceDown 1.6s ease-in-out infinite; }
   @keyframes bounceDown{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px); } }
 
-  .word-wrap{ position:relative; width:100%; max-width:1100px; height:clamp(180px,34vw,340px); }
+  .word-wrap{ position:relative; width:100%; max-width:1100px; height:clamp(200px,42vw,440px); }
   .word{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-size:clamp(56px,13vw,168px); color:var(--cream); opacity:0; transform:translateY(26px);
-    transition:opacity .5s var(--ease), transform .6s var(--ease); z-index:1; white-space:nowrap;
+    padding:0 24px;
+    font-size:clamp(64px,15vw,210px); color:var(--cream); opacity:0; transform:translateY(26px);
+    transition:opacity .5s var(--ease), transform .6s var(--ease); z-index:1; white-space:normal; line-height:0.95;
   }
   .word.active{ opacity:0.9; transform:translateY(0); }
+
+  @media (max-width:480px){
+    .word-wrap{ height:clamp(150px,44vw,260px); }
+    .word{
+      font-size:17vw;
+      white-space:normal;
+      line-height:0.95;
+      padding:0 10px;
+    }
+  }
 
   .dish-stage{ position:absolute; inset:0; z-index:3; display:flex; align-items:center; justify-content:center; perspective:900px; }
   .dish{
@@ -334,27 +345,47 @@ document.querySelectorAll('.flavor-tab, .pill').forEach(btn=>{
   });
 });
 
-/* ---------- scroll-driven dish switching ---------- */
+/* ---------- scroll/swipe-driven dish switching ---------- */
 const order = ['home', 'chinese', 'malay', 'indian'];
 let orderIndex = 0;
 let scrollLocked = false;
 
-window.addEventListener('wheel', (e)=>{
-  e.preventDefault();
+function attemptSwitch(goingDown){
   if (scrollLocked) return;
-
-  const goingDown = e.deltaY > 0;
   const nextIndex = orderIndex + (goingDown ? 1 : -1);
   if (nextIndex < 0 || nextIndex > order.length - 1) return;
 
   scrollLocked = true;
   orderIndex = nextIndex;
-  const key = order[orderIndex];
-  const tabEl = document.querySelector(`.flavor-tab[data-dish="${key}"]`);
-  setDish(key, tabEl);
+  setDish(order[orderIndex]);
 
   setTimeout(()=>{ scrollLocked = false; }, 1700);
+}
+
+window.addEventListener('wheel', (e)=>{
+  e.preventDefault();
+  attemptSwitch(e.deltaY > 0);
 }, { passive:false });
+
+/* touch devices don't fire wheel events at all, so a vertical swipe
+   needs its own listener translating gesture direction into the same switch */
+let touchStartY = null;
+
+window.addEventListener('touchstart', (e)=>{
+  touchStartY = e.touches[0].clientY;
+}, { passive:true });
+
+window.addEventListener('touchmove', (e)=>{
+  e.preventDefault();
+}, { passive:false });
+
+window.addEventListener('touchend', (e)=>{
+  if (touchStartY === null) return;
+  const deltaY = touchStartY - e.changedTouches[0].clientY;
+  touchStartY = null;
+  if (Math.abs(deltaY) < 40) return;
+  attemptSwitch(deltaY > 0);
+}, { passive:true });
 
 /* initial state */
 applyDishContent('home');
