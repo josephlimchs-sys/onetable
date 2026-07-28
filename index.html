@@ -26,7 +26,6 @@
     color:var(--cream);
     font-family:'Work Sans', sans-serif;
     overflow-x:hidden;
-    transition:background 0.7s var(--ease);
     min-height:100svh;
     display:flex; flex-direction:column;
   }
@@ -270,6 +269,7 @@ const data = {
   malay:   { color:'#3FA06B', word:'Nasi lemak',   stall:'STALL 11 · MALAY',   desc:'Coconut rice, crisp ikan bilis, roasted peanuts, sambal on the side.', price:'$3.80' },
   indian:  { color:'#E3A93B', word:'Roti prata',   stall:'STALL 19 · INDIAN',  desc:'Dough stretched paper-thin, torn by hand, dipped in curry gravy.', price:'$2.20' }
 };
+const root = document.documentElement;
 const stallTag = document.getElementById('stall-tag');
 const desc = document.getElementById('desc');
 const priceEl = document.getElementById('price');
@@ -322,6 +322,8 @@ function applyDishContent(key){
 }
 
 function setDish(key){
+  const d = data[key];
+  root.style.setProperty('--bg', d.color);
   applyDishContent(key);
 }
 
@@ -351,7 +353,7 @@ window.addEventListener('wheel', (e)=>{
   const tabEl = document.querySelector(`.flavor-tab[data-dish="${key}"]`);
   setDish(key, tabEl);
 
-  setTimeout(()=>{ scrollLocked = false; }, 900);
+  setTimeout(()=>{ scrollLocked = false; }, 1700);
 }, { passive:false });
 
 /* initial state */
