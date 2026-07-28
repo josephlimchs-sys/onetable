@@ -17,6 +17,7 @@
     --indian:#E3A93B;
     --bg: var(--chinese);
     --ease: cubic-bezier(.22,1,.36,1);
+    --ease-float: cubic-bezier(.34,1.56,.64,1);
   }
   *{ box-sizing:border-box; }
   html,body{ margin:0; height:100%; }
@@ -79,6 +80,32 @@
   }
   .eyebrow{ font-size:12px; letter-spacing:0.22em; color:rgba(255,249,240,0.7); margin-bottom:18px; z-index:5; position:relative; }
 
+  /* ---------- home / dish view switching ---------- */
+  .home-view, .dish-view{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    opacity:0; pointer-events:none; transition:opacity .5s var(--ease);
+  }
+  .home-view.active, .dish-view.active{ opacity:1; pointer-events:auto; }
+
+  .home-word{ font-size:clamp(56px,13vw,168px); color:var(--cream); margin:6px 0 22px; }
+  .home-tagline{ max-width:520px; margin:0 auto 30px; font-size:15.5px; line-height:1.75; color:rgba(255,249,240,0.85); }
+  .cuisine-pills{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:56px; }
+  .pill{
+    display:inline-flex; align-items:center; gap:8px; font-family:'Space Mono',monospace;
+    font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:var(--cream);
+    background:rgba(255,249,240,0.08); border:1px solid rgba(255,249,240,0.18);
+    padding:9px 16px; border-radius:999px; cursor:pointer; transition:background .25s var(--ease), transform .15s var(--ease);
+  }
+  .pill:hover{ background:rgba(255,249,240,0.16); transform:translateY(-2px); }
+  .pill .dot{ width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .home-scroll-cue{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    font-size:11px; letter-spacing:0.2em; color:rgba(255,249,240,0.6);
+  }
+  .home-scroll-cue .chevron{ font-size:16px; animation:bounceDown 1.6s ease-in-out infinite; }
+  @keyframes bounceDown{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(6px); } }
+
   .word-wrap{ position:relative; width:100%; max-width:1100px; height:clamp(180px,34vw,340px); }
   .word{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -90,12 +117,12 @@
   .dish-stage{ position:absolute; inset:0; z-index:3; display:flex; align-items:center; justify-content:center; perspective:900px; }
   .dish{
     position:absolute; width:clamp(220px,26vw,320px); opacity:0;
-    transform:scale(0.8) rotate(-6deg); pointer-events:none; filter:drop-shadow(0 30px 40px rgba(0,0,0,0.28));
-    transition:opacity .5s var(--ease), transform .6s var(--ease);
+    transform:scale(0.8) rotate(-6deg) translateY(50px); pointer-events:none; filter:drop-shadow(0 30px 40px rgba(0,0,0,0.28));
+    transition:opacity .5s var(--ease), transform .7s var(--ease-float);
     transform-style:preserve-3d;
   }
   .dish img{ width:100%; display:block; }
-  .dish.active{ opacity:1; transform:scale(1) rotate(0deg); }
+  .dish.active{ opacity:1; transform:scale(1) rotate(0deg) translateY(0); }
   .dish-tilt{ will-change:transform; }
 
   .meta{ z-index:5; position:relative; margin-top:8px; }
@@ -112,7 +139,7 @@
     display:inline-flex; align-items:center; gap:10px; font-size:13px; letter-spacing:0.1em;
     font-weight:600; color:var(--cream); cursor:pointer; background:none; border:none;
     position:relative; overflow:hidden; padding:10px 16px; border-radius:999px;
-    transition:transform .15s var(--ease);
+    transition:transform .15s var(--ease), opacity .3s var(--ease);
   }
   .cta span{ display:inline-block; transition:transform .25s var(--ease); }
   .cta:hover span{ transform:translateX(6px); }
@@ -122,6 +149,8 @@
   }
   @keyframes rippleOut{ to{ transform:scale(1); opacity:0; } }
   .credit{ font-size:11px; color:rgba(255,249,240,0.55); letter-spacing:0.04em; }
+  .foot-row.home-mode .price, .foot-row.home-mode .cta{ opacity:0; pointer-events:none; }
+  .price{ transition:opacity .3s var(--ease); }
 
   @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
 </style>
@@ -133,7 +162,7 @@
 <nav class="reveal" id="reveal-nav">
   <div class="nav-logo">ONE TABLE</div>
   <div class="flavor-tabs" role="tablist" aria-label="Choose a dish">
-    <button class="flavor-tab active" data-dish="chinese">Chinese</button>
+    <button class="flavor-tab" data-dish="chinese">Chinese</button>
     <button class="flavor-tab" data-dish="malay">Malay</button>
     <button class="flavor-tab" data-dish="indian">Indian</button>
     <div class="tab-indicator" id="tab-indicator"></div>
@@ -142,23 +171,35 @@
 </nav>
 
 <div class="stage">
-  <div class="eyebrow mono reveal" id="reveal-eyebrow">SINGAPORE, ONE VOID DECK AT A TIME</div>
-
-  <div class="word-wrap reveal" id="reveal-word">
-    <div class="word display active" data-dish="chinese">Chicken rice</div>
-    <div class="word display" data-dish="malay">Nasi lemak</div>
-    <div class="word display" data-dish="indian">Roti prata</div>
-
-    <div class="dish-stage">
-      <div class="dish active" data-dish="chinese"><div class="dish-tilt"><img src="assets/chicken-rice.png" alt="Hainanese chicken rice"></div></div>
-      <div class="dish" data-dish="malay"><div class="dish-tilt"><img src="assets/nasi-lemak.png" alt="Nasi lemak"></div></div>
-      <div class="dish" data-dish="indian"><div class="dish-tilt"><img src="assets/roti-prata.png" alt="Roti prata"></div></div>
+  <div class="home-view active" id="home-view">
+    <div class="eyebrow mono reveal" id="reveal-home-eyebrow">SINGAPORE, ONE VOID DECK AT A TIME</div>
+    <div class="home-word display reveal" id="reveal-home-word">One table</div>
+    <p class="home-tagline reveal" id="reveal-home-tagline">Three kitchens. Three languages. One hawker centre floor — this is what a Tuesday lunch in Singapore actually looks like.</p>
+    <div class="cuisine-pills reveal" id="reveal-home-pills">
+      <button class="pill" data-dish="chinese"><span class="dot" style="background:#E15241"></span>Chinese</button>
+      <button class="pill" data-dish="malay"><span class="dot" style="background:#3FA06B"></span>Malay</button>
+      <button class="pill" data-dish="indian"><span class="dot" style="background:#E3A93B"></span>Indian</button>
     </div>
+    <div class="home-scroll-cue mono reveal" id="reveal-home-cue">SCROLL TO BEGIN <span class="chevron">⌄</span></div>
   </div>
 
-  <div class="meta reveal" id="reveal-meta">
-    <p class="stall-tag mono" id="stall-tag">STALL 04 · CHINESE</p>
-    <p class="desc" id="desc">Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.</p>
+  <div class="dish-view" id="dish-view">
+    <div class="word-wrap reveal" id="reveal-word">
+      <div class="word display" data-dish="chinese">Chicken rice</div>
+      <div class="word display" data-dish="malay">Nasi lemak</div>
+      <div class="word display" data-dish="indian">Roti prata</div>
+
+      <div class="dish-stage">
+        <div class="dish" data-dish="chinese"><div class="dish-tilt"><img src="assets/chicken-rice.png" alt="Hainanese chicken rice"></div></div>
+        <div class="dish" data-dish="malay"><div class="dish-tilt"><img src="assets/nasi-lemak.png" alt="Nasi lemak"></div></div>
+        <div class="dish" data-dish="indian"><div class="dish-tilt"><img src="assets/roti-prata.png" alt="Roti prata"></div></div>
+      </div>
+    </div>
+
+    <div class="meta reveal" id="reveal-meta">
+      <p class="stall-tag mono" id="stall-tag">STALL 04 · CHINESE</p>
+      <p class="desc" id="desc">Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.</p>
+    </div>
   </div>
 </div>
 
@@ -221,6 +262,7 @@ cta.addEventListener('click', (e)=>{
 
 /* ---------- tab morph ---------- */
 const data = {
+  home:    { color:'#1D1712' },
   chinese: { color:'#E15241', word:'Chicken rice', stall:'STALL 04 · CHINESE', desc:"Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.", price:'$4.50' },
   malay:   { color:'#3FA06B', word:'Nasi lemak',   stall:'STALL 11 · MALAY',   desc:'Coconut rice, crisp ikan bilis, roasted peanuts, sambal on the side.', price:'$3.80' },
   indian:  { color:'#E3A93B', word:'Roti prata',   stall:'STALL 19 · INDIAN',  desc:'Dough stretched paper-thin, torn by hand, dipped in curry gravy.', price:'$2.20' }
@@ -232,6 +274,9 @@ const priceEl = document.getElementById('price');
 const wipe = document.getElementById('wipe');
 const indicator = document.getElementById('tab-indicator');
 const tabsWrap = document.querySelector('.flavor-tabs');
+const homeView = document.getElementById('home-view');
+const dishView = document.getElementById('dish-view');
+const footRow = document.getElementById('reveal-foot');
 
 function moveIndicator(tabEl){
   const wrapRect = tabsWrap.getBoundingClientRect();
@@ -249,23 +294,35 @@ function floatIn(el, delay){
 
 function applyDishContent(key){
   const d = data[key];
+  const isHome = key === 'home';
+
   document.querySelectorAll('.flavor-tab').forEach(t=>{
     t.classList.toggle('active', t.dataset.dish===key);
     if (t.dataset.dish===key) moveIndicator(t);
   });
+  if (isHome) indicator.style.width = '0px';
+
+  homeView.classList.toggle('active', isHome);
+  dishView.classList.toggle('active', !isHome);
+  footRow.classList.toggle('home-mode', isHome);
+
   document.querySelectorAll('.word').forEach(w=> w.classList.toggle('active', w.dataset.dish===key));
   document.querySelectorAll('.dish').forEach(el=> el.classList.toggle('active', el.dataset.dish===key));
-  stallTag.textContent = d.stall;
-  desc.textContent = d.desc;
-  priceEl.innerHTML = "TODAY'S PLATE <b>" + d.price + "</b>";
-  floatIn(stallTag, 0);
-  floatIn(desc, 90);
-  floatIn(priceEl, 160);
+
+  if (!isHome){
+    stallTag.textContent = d.stall;
+    desc.textContent = d.desc;
+    priceEl.innerHTML = "TODAY'S PLATE <b>" + d.price + "</b>";
+    floatIn(stallTag, 0);
+    floatIn(desc, 90);
+    floatIn(priceEl, 160);
+  }
 }
 
 function setDish(key, originEl){
   const d = data[key];
-  const rect = (originEl || document.querySelector('.flavor-tab.active')).getBoundingClientRect();
+  const fallback = document.querySelector('.flavor-tab.active') || document.querySelector('.nav-logo');
+  const rect = (originEl || fallback).getBoundingClientRect();
   const ox = rect.left + rect.width/2;
   const oy = rect.top + rect.height/2;
   const radius = Math.hypot(
@@ -292,15 +349,15 @@ function setDish(key, originEl){
   }, 720);
 }
 
-document.querySelectorAll('.flavor-tab').forEach(tab=>{
-  tab.addEventListener('click', ()=>{
-    orderIndex = order.indexOf(tab.dataset.dish);
-    setDish(tab.dataset.dish, tab);
+document.querySelectorAll('.flavor-tab, .pill').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    orderIndex = order.indexOf(btn.dataset.dish);
+    setDish(btn.dataset.dish, btn);
   });
 });
 
 /* ---------- scroll-driven dish switching ---------- */
-const order = ['chinese', 'malay', 'indian'];
+const order = ['home', 'chinese', 'malay', 'indian'];
 let orderIndex = 0;
 let scrollLocked = false;
 
@@ -322,11 +379,17 @@ window.addEventListener('wheel', (e)=>{
 }, { passive:false });
 
 /* initial state (no wipe on load) */
-root.style.setProperty('--bg', data.chinese.color);
-applyDishContent('chinese');
-window.addEventListener('resize', ()=> moveIndicator(document.querySelector('.flavor-tab.active')));
+root.style.setProperty('--bg', data.home.color);
+applyDishContent('home');
+window.addEventListener('resize', ()=>{
+  const activeTab = document.querySelector('.flavor-tab.active');
+  if (activeTab) moveIndicator(activeTab);
+});
 if (document.fonts && document.fonts.ready){
-  document.fonts.ready.then(()=> moveIndicator(document.querySelector('.flavor-tab.active')));
+  document.fonts.ready.then(()=>{
+    const activeTab = document.querySelector('.flavor-tab.active');
+    if (activeTab) moveIndicator(activeTab);
+  });
 }
 
 /* ---------- entrance stagger ---------- */
@@ -334,8 +397,9 @@ if (document.fonts && document.fonts.ready){
    rather than waiting on load/DOMContentLoaded, which may have already fired */
 requestAnimationFrame(()=>{
   const seq = [
-    ['reveal-nav', 0], ['reveal-eyebrow', 120], ['reveal-word', 220],
-    ['reveal-meta', 420], ['reveal-foot', 520]
+    ['reveal-nav', 0], ['reveal-home-eyebrow', 120], ['reveal-home-word', 220],
+    ['reveal-home-tagline', 380], ['reveal-home-pills', 480], ['reveal-home-cue', 580],
+    ['reveal-word', 0], ['reveal-meta', 0], ['reveal-foot', 520]
   ];
   seq.forEach(([id, delay])=>{
     const el = document.getElementById(id);
