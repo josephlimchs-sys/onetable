@@ -117,8 +117,8 @@
   .dish-stage{ position:absolute; inset:0; z-index:3; display:flex; align-items:center; justify-content:center; perspective:900px; }
   .dish{
     position:absolute; width:clamp(220px,26vw,320px); opacity:0;
-    transform:scale(0.8) rotate(-6deg) translateY(50px); pointer-events:none; filter:drop-shadow(0 30px 40px rgba(0,0,0,0.28));
-    transition:opacity .5s var(--ease), transform .7s var(--ease-float);
+    transform:scale(0.6) rotate(-10deg) translateY(90px); pointer-events:none; filter:drop-shadow(0 30px 40px rgba(0,0,0,0.28));
+    transition:opacity .35s var(--ease), transform .9s var(--ease-float) .08s;
     transform-style:preserve-3d;
   }
   .dish img{ width:100%; display:block; }
@@ -162,6 +162,7 @@
 <nav class="reveal" id="reveal-nav">
   <div class="nav-logo">ONE TABLE</div>
   <div class="flavor-tabs" role="tablist" aria-label="Choose a dish">
+    <button class="flavor-tab" data-dish="home">Home</button>
     <button class="flavor-tab" data-dish="chinese">Chinese</button>
     <button class="flavor-tab" data-dish="malay">Malay</button>
     <button class="flavor-tab" data-dish="indian">Indian</button>
@@ -300,7 +301,6 @@ function applyDishContent(key){
     t.classList.toggle('active', t.dataset.dish===key);
     if (t.dataset.dish===key) moveIndicator(t);
   });
-  if (isHome) indicator.style.width = '0px';
 
   homeView.classList.toggle('active', isHome);
   dishView.classList.toggle('active', !isHome);
