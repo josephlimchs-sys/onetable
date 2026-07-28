@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>One Table — three kitchens, one table</title>
+<meta name="description" content="Three Singapore hawker classics — Hainanese chicken rice, nasi lemak, and roti prata — on one page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF9F0;
+    --ink:#1D1712;
+    --chinese:#E15241;
+    --malay:#3FA06B;
+    --indian:#E3A93B;
+    --bg: var(--chinese);
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; }
+  body{
+    background:var(--bg);
+    color:var(--cream);
+    font-family:'Work Sans', sans-serif;
+    overflow-x:hidden;
+    transition:background 0.7s var(--ease);
+    min-height:100svh;
+    display:flex; flex-direction:column;
+  }
+  .display{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    text-transform:uppercase;
+    line-height:0.9;
+    margin:0;
+  }
+  .mono{ font-family:'Space Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- nav ---------- */
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:26px clamp(20px,5vw,56px) 0;
+    position:relative; z-index:6;
+  }
+  .nav-logo{ font-family:'Anton',sans-serif; font-size:18px; letter-spacing:0.06em; }
+  .flavor-tabs{ display:flex; gap:34px; }
+  .flavor-tab{
+    background:none; border:none; font-family:'Space Mono',monospace; font-size:13px;
+    letter-spacing:0.08em; text-transform:uppercase; color:rgba(255,249,240,0.65); cursor:pointer;
+    padding:6px 2px; border-bottom:2px solid transparent;
+    transition:color .3s var(--ease), border-color .3s var(--ease);
+  }
+  .flavor-tab.active{ color:var(--cream); border-bottom-color:var(--cream); }
+  .nav-right{ font-size:12px; letter-spacing:0.06em; color:rgba(255,249,240,0.7); }
+  @media (max-width:720px){ .flavor-tabs{ gap:18px; } .nav-right{ display:none; } }
+
+  /* ---------- stage ---------- */
+  .stage{
+    position:relative; flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding:20px 20px 0; overflow:hidden; min-height:520px;
+  }
+  .eyebrow{ font-size:12px; letter-spacing:0.22em; color:rgba(255,249,240,0.7); margin-bottom:18px; z-index:5; position:relative; }
+
+  .word-wrap{ position:relative; width:100%; max-width:1100px; height:clamp(180px,34vw,340px); }
+  .word{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:clamp(56px,13vw,168px); color:var(--cream); opacity:0;
+    transition:opacity .5s var(--ease); z-index:1; white-space:nowrap;
+  }
+  .word.active{ opacity:0.9; }
+
+  .dish-stage{ position:absolute; inset:0; z-index:3; display:flex; align-items:center; justify-content:center; }
+  .dish{
+    position:absolute; width:clamp(220px,26vw,320px); opacity:0;
+    transform:scale(0.8) rotate(-6deg); pointer-events:none; filter:drop-shadow(0 30px 40px rgba(0,0,0,0.28));
+    transition:opacity .5s var(--ease), transform .6s var(--ease);
+  }
+  .dish img{ width:100%; display:block; mix-blend-mode:multiply; border-radius:50%; }
+  .dish.active{ opacity:1; transform:scale(1) rotate(0deg); }
+
+  .ingredient{
+    position:absolute; z-index:2; pointer-events:none; opacity:0; will-change:transform;
+    filter:drop-shadow(0 10px 14px rgba(0,0,0,0.18));
+    transition:opacity .45s var(--ease);
+  }
+  .ingredient.active{ opacity:0.95; }
+
+  .meta{ z-index:5; position:relative; margin-top:8px; }
+  .stall-tag{ font-size:12px; letter-spacing:0.16em; color:rgba(255,249,240,0.75); margin-bottom:8px; }
+  .desc{ max-width:440px; margin:0 auto; font-size:14.5px; line-height:1.65; color:rgba(255,249,240,0.85); }
+
+  .foot-row{
+    z-index:5; position:relative; display:flex; align-items:center; justify-content:space-between;
+    padding:22px clamp(20px,5vw,56px) 30px; gap:16px; flex-wrap:wrap;
+  }
+  .price{ font-family:'Space Mono',monospace; font-size:13px; color:rgba(255,249,240,0.8); }
+  .price b{ color:var(--cream); font-size:18px; }
+  .cta{
+    display:inline-flex; align-items:center; gap:10px; font-size:13px; letter-spacing:0.1em;
+    font-weight:600; color:var(--cream); cursor:pointer; background:none; border:none;
+  }
+  .cta span{ display:inline-block; transition:transform .25s var(--ease); }
+  .cta:hover span{ transform:translateX(6px); }
+  .credit{ font-size:11px; color:rgba(255,249,240,0.55); letter-spacing:0.04em; }
+
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">ONE TABLE</div>
+  <div class="flavor-tabs" role="tablist" aria-label="Choose a dish">
+    <button class="flavor-tab active" data-dish="chinese">Chinese</button>
+    <button class="flavor-tab" data-dish="malay">Malay</button>
+    <button class="flavor-tab" data-dish="indian">Indian</button>
+  </div>
+  <div class="nav-right mono">SG HAWKER CO.</div>
+</nav>
+
+<div class="stage">
+  <div class="eyebrow mono">SINGAPORE, ONE VOID DECK AT A TIME</div>
+
+  <div class="word-wrap">
+    <div class="word display active" data-dish="chinese">Chicken rice</div>
+    <div class="word display" data-dish="malay">Nasi lemak</div>
+    <div class="word display" data-dish="indian">Roti prata</div>
+
+    <div class="dish-stage">
+      <div class="dish active" data-dish="chinese"><img src="assets/chicken-rice.jpg" alt="Hainanese chicken rice"></div>
+      <div class="dish" data-dish="malay"><img src="assets/nasi-lemak.jpg" alt="Nasi lemak"></div>
+      <div class="dish" data-dish="indian"><img src="assets/roti-prata.jpg" alt="Roti prata"></div>
+    </div>
+
+    <!-- floating ingredients, per dish -->
+    <div class="ingredient active" data-dish="chinese" data-depth="0.05" style="top:8%; left:6%;" id="ing-cucumber"></div>
+    <div class="ingredient active" data-dish="chinese" data-depth="0.08" style="bottom:10%; left:10%;" id="ing-chili"></div>
+    <div class="ingredient active" data-dish="chinese" data-depth="0.06" style="top:10%; right:8%;" id="ing-soy"></div>
+    <div class="ingredient active" data-dish="chinese" data-depth="0.09" style="bottom:8%; right:12%;" id="ing-cilantro"></div>
+
+    <div class="ingredient" data-dish="malay" data-depth="0.05" style="top:8%; left:8%;" id="ing-egg"></div>
+    <div class="ingredient" data-dish="malay" data-depth="0.08" style="bottom:12%; left:6%;" id="ing-peanut"></div>
+    <div class="ingredient" data-dish="malay" data-depth="0.06" style="top:12%; right:6%;" id="ing-sambal"></div>
+    <div class="ingredient" data-dish="malay" data-depth="0.09" style="bottom:8%; right:10%;" id="ing-ikanbilis"></div>
+
+    <div class="ingredient" data-dish="indian" data-depth="0.05" style="top:8%; left:8%;" id="ing-curry"></div>
+    <div class="ingredient" data-dish="indian" data-depth="0.08" style="bottom:10%; left:8%;" id="ing-dhal"></div>
+    <div class="ingredient" data-dish="indian" data-depth="0.06" style="top:10%; right:8%;" id="ing-curryleaf"></div>
+    <div class="ingredient" data-dish="indian" data-depth="0.09" style="bottom:12%; right:8%;" id="ing-chili2"></div>
+  </div>
+
+  <div class="meta">
+    <p class="stall-tag mono" id="stall-tag">STALL 04 · CHINESE</p>
+    <p class="desc" id="desc">Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.</p>
+  </div>
+</div>
+
+<div class="foot-row">
+  <div class="price mono" id="price">TODAY'S PLATE <b>$4.50</b></div>
+  <button class="cta" id="cta">SEE THE STALL <span><i></i>→</span></button>
+  <div class="credit">One table. A small design study of Singapore's hawker culture.</div>
+</div>
+
+<script>
+/* ---------- flat SVG ingredient icons ---------- */
+const icons = {
+  cucumber: `<svg viewBox="0 0 44 44" width="30"><circle cx="22" cy="22" r="17" fill="#F7F1E4"/><circle cx="22" cy="22" r="17" fill="none" stroke="#3FA06B" stroke-width="4"/><circle cx="22" cy="22" r="9" fill="#EFE6D3"/></svg>`,
+  chili:    `<svg viewBox="0 0 40 40" width="26"><path d="M12 8 C10 6 8 6 6 8 C10 10 8 14 12 16 C22 20 30 28 26 34 C22 38 12 34 12 26 C12 20 16 16 18 14" fill="none" stroke="#E15241" stroke-width="4" stroke-linecap="round"/></svg>`,
+  soy:      `<svg viewBox="0 0 40 40" width="26"><ellipse cx="20" cy="20" rx="15" ry="15" fill="#F7F1E4"/><ellipse cx="20" cy="20" rx="9" ry="9" fill="#241B12"/></svg>`,
+  cilantro: `<svg viewBox="0 0 40 40" width="24"><path d="M20 34 C20 20 20 14 20 6 M20 20 C12 16 8 10 6 4 M20 20 C28 16 32 10 34 4 M20 26 C13 24 8 20 5 15 M20 26 C27 24 32 20 35 15" stroke="#3FA06B" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>`,
+  egg:      `<svg viewBox="0 0 40 40" width="28"><ellipse cx="20" cy="22" rx="16" ry="12" fill="#F7F1E4"/><circle cx="20" cy="22" r="7" fill="#F0C453"/></svg>`,
+  peanut:   `<svg viewBox="0 0 40 40" width="24"><ellipse cx="16" cy="16" rx="9" ry="7" fill="#C9743A"/><ellipse cx="24" cy="26" rx="9" ry="7" fill="#DE8A4D"/></svg>`,
+  sambal:   `<svg viewBox="0 0 40 40" width="28"><circle cx="20" cy="20" r="17" fill="#B8321F"/><circle cx="20" cy="20" r="10" fill="#DE4B3A"/></svg>`,
+  ikanbilis:`<svg viewBox="0 0 40 40" width="26"><path d="M4 20 C12 8 28 8 36 20 C28 32 12 32 4 20 Z" fill="#DDA23A" opacity="0.9"/></svg>`,
+  curry:    `<svg viewBox="0 0 40 40" width="28"><circle cx="20" cy="20" r="17" fill="#E3A93B"/><circle cx="20" cy="20" r="10" fill="#C77B1E"/></svg>`,
+  dhal:     `<svg viewBox="0 0 40 40" width="26"><circle cx="20" cy="20" r="16" fill="#F0C453"/><circle cx="20" cy="20" r="9" fill="#E3A93B"/></svg>`,
+  curryleaf:`<svg viewBox="0 0 40 40" width="24"><ellipse cx="20" cy="20" rx="13" ry="9" fill="#3C7A46" transform="rotate(30 20 20)"/></svg>`
+};
+document.getElementById('ing-cucumber').innerHTML = icons.cucumber;
+document.getElementById('ing-chili').innerHTML = icons.chili;
+document.getElementById('ing-soy').innerHTML = icons.soy;
+document.getElementById('ing-cilantro').innerHTML = icons.cilantro;
+document.getElementById('ing-egg').innerHTML = icons.egg;
+document.getElementById('ing-peanut').innerHTML = icons.peanut;
+document.getElementById('ing-sambal').innerHTML = icons.sambal;
+document.getElementById('ing-ikanbilis').innerHTML = icons.ikanbilis;
+document.getElementById('ing-curry').innerHTML = icons.curry;
+document.getElementById('ing-dhal').innerHTML = icons.dhal;
+document.getElementById('ing-curryleaf').innerHTML = icons.curryleaf;
+document.getElementById('ing-chili2').innerHTML = icons.chili;
+
+/* ---------- idle bob loop for every ingredient, staggered ---------- */
+document.querySelectorAll('.ingredient').forEach((el, i)=>{
+  el.animate(
+    [{transform:'translateY(0px)'},{transform:'translateY(-10px)'},{transform:'translateY(0px)'}],
+    { duration: 2600 + (i % 4) * 350, delay: i * 180, iterations: Infinity, easing:'ease-in-out' }
+  );
+});
+
+/* ---------- cursor parallax, eased, per element depth ---------- */
+let mx = 0, my = 0;
+window.addEventListener('mousemove', (e)=>{
+  mx = e.clientX - window.innerWidth/2;
+  my = e.clientY - window.innerHeight/2;
+});
+const parallaxEls = Array.from(document.querySelectorAll('.ingredient'));
+const cur = parallaxEls.map(()=>({x:0,y:0}));
+function tick(){
+  parallaxEls.forEach((el,i)=>{
+    const depth = parseFloat(el.dataset.depth || 0.05);
+    cur[i].x += (mx*depth - cur[i].x) * 0.06;
+    cur[i].y += (my*depth - cur[i].y) * 0.06;
+    el.style.marginLeft = cur[i].x + 'px';
+    el.style.marginTop = cur[i].y + 'px';
+  });
+  requestAnimationFrame(tick);
+}
+tick();
+
+/* ---------- gentle idle rotation on the active dish photo ---------- */
+document.querySelectorAll('.dish').forEach((el)=>{
+  el.animate(
+    [{transform:'rotate(-1.5deg)'},{transform:'rotate(1.5deg)'},{transform:'rotate(-1.5deg)'}],
+    { duration: 5200, iterations: Infinity, easing:'ease-in-out' }
+  );
+});
+
+/* ---------- tab morph ---------- */
+const data = {
+  chinese: { color:'var(--chinese)', word:'Chicken rice', stall:'STALL 04 · CHINESE', desc:"Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.", price:'$4.50' },
+  malay:   { color:'var(--malay)',   word:'Nasi lemak',   stall:'STALL 11 · MALAY',   desc:'Coconut rice, crisp ikan bilis, roasted peanuts, sambal on the side.', price:'$3.80' },
+  indian:  { color:'var(--indian)',  word:'Roti prata',   stall:'STALL 19 · INDIAN',  desc:'Dough stretched paper-thin, torn by hand, dipped in curry gravy.', price:'$2.20' }
+};
+const root = document.documentElement;
+const stallTag = document.getElementById('stall-tag');
+const desc = document.getElementById('desc');
+const priceEl = document.getElementById('price');
+
+function setDish(key){
+  const d = data[key];
+  root.style.setProperty('--bg', d.color);
+  document.querySelectorAll('.flavor-tab').forEach(t=> t.classList.toggle('active', t.dataset.dish===key));
+  document.querySelectorAll('.word').forEach(w=> w.classList.toggle('active', w.dataset.dish===key));
+  document.querySelectorAll('.dish').forEach(el=> el.classList.toggle('active', el.dataset.dish===key));
+  document.querySelectorAll('.ingredient').forEach(el=> el.classList.toggle('active', el.dataset.dish===key));
+  stallTag.textContent = d.stall;
+  desc.textContent = d.desc;
+  priceEl.innerHTML = "TODAY'S PLATE <b>" + d.price + "</b>";
+}
+document.querySelectorAll('.flavor-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=> setDish(tab.dataset.dish));
+});
+setDish('chinese');
+</script>
+</body>
+</html>
