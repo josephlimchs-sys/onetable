@@ -141,6 +141,39 @@
   .stall-tag{ font-size:12px; letter-spacing:0.16em; color:rgba(255,249,240,0.75); margin-bottom:8px; }
   .desc{ max-width:440px; margin:0 auto; font-size:14.5px; line-height:1.65; color:rgba(255,249,240,0.85); }
 
+  .video-hint{ margin-top:22px; font-size:11.5px; letter-spacing:0.08em; color:rgba(255,249,240,0.6); }
+  .watch-btn{
+    margin-top:12px; display:inline-flex; align-items:center; gap:9px;
+    background:rgba(255,249,240,0.1); border:1px solid rgba(255,249,240,0.28);
+    color:var(--cream); font-family:'Space Mono',monospace; font-size:13px; letter-spacing:0.05em;
+    padding:11px 22px; border-radius:999px; cursor:pointer;
+    transition:background .25s var(--ease), transform .15s var(--ease), border-color .25s var(--ease);
+  }
+  .watch-btn:hover{ background:rgba(255,249,240,0.2); border-color:rgba(255,249,240,0.5); transform:translateY(-2px); }
+  .watch-btn svg{ flex-shrink:0; }
+
+  /* ---------- video modal ---------- */
+  .video-modal{
+    position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .3s var(--ease);
+  }
+  .video-modal.active{ opacity:1; pointer-events:auto; }
+  .video-modal-backdrop{ position:absolute; inset:0; background:rgba(10,8,6,0.82); }
+  .video-modal-panel{
+    position:relative; width:min(880px, 92vw); z-index:1;
+    transform:scale(0.94) translateY(16px); transition:transform .35s var(--ease-float);
+  }
+  .video-modal.active .video-modal-panel{ transform:scale(1) translateY(0); }
+  .video-modal-frame{
+    position:relative; width:100%; padding-top:56.25%; border-radius:14px; overflow:hidden;
+    background:#000; box-shadow:0 30px 70px rgba(0,0,0,0.5);
+  }
+  .video-modal-frame iframe{ position:absolute; inset:0; width:100%; height:100%; }
+  .video-modal-close{
+    position:absolute; top:-44px; right:0; background:none; border:none; color:var(--cream);
+    font-size:32px; line-height:1; cursor:pointer; padding:4px 8px;
+  }
+
   .foot-row{
     z-index:5; position:relative; display:flex; align-items:center; justify-content:space-between;
     padding:22px clamp(20px,5vw,56px) 30px; gap:16px; flex-wrap:wrap;
@@ -170,6 +203,18 @@
 <body>
 
 <div class="home-bg active" id="home-bg"></div>
+
+<div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-label="Cooking video">
+  <div class="video-modal-backdrop" id="video-modal-backdrop"></div>
+  <div class="video-modal-panel">
+    <button class="video-modal-close" id="video-modal-close" aria-label="Close video">&times;</button>
+    <div class="video-modal-frame">
+      <iframe id="video-modal-iframe" src="" title="Dish preparation video" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
 
 <nav class="reveal" id="reveal-nav">
   <div class="nav-logo">ONE TABLE</div>
@@ -212,6 +257,11 @@
     <div class="meta reveal" id="reveal-meta">
       <p class="stall-tag mono" id="stall-tag">STALL 04 · CHINESE</p>
       <p class="desc" id="desc">Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.</p>
+      <p class="video-hint mono">Click button to learn how the dish is prepared</p>
+      <button class="watch-btn" id="watch-btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        Watch Video
+      </button>
     </div>
   </div>
 </div>
@@ -276,9 +326,9 @@ cta.addEventListener('click', (e)=>{
 /* ---------- tab morph ---------- */
 const data = {
   home:    { color:'#1D1712' },
-  chinese: { color:'#E15241', word:'Chicken rice', stall:'STALL 04 · CHINESE', desc:"Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.", price:'$4.50' },
-  malay:   { color:'#3FA06B', word:'Nasi lemak',   stall:'STALL 11 · MALAY',   desc:'Coconut rice, crisp ikan bilis, roasted peanuts, sambal on the side.', price:'$3.80' },
-  indian:  { color:'#E3A93B', word:'Roti prata',   stall:'STALL 19 · INDIAN',  desc:'Dough stretched paper-thin, torn by hand, dipped in curry gravy.', price:'$2.20' }
+  chinese: { color:'#E15241', word:'Chicken rice', stall:'STALL 04 · CHINESE', desc:"Poached chicken, silky rice, dark soy, chilli-ginger dip. The everyday classic.", price:'$4.50', video:'XPA3rn1XImY' },
+  malay:   { color:'#3FA06B', word:'Nasi lemak',   stall:'STALL 11 · MALAY',   desc:'Coconut rice, crisp ikan bilis, roasted peanuts, sambal on the side.', price:'$3.80', video:'EDrf14zaQps' },
+  indian:  { color:'#E3A93B', word:'Roti prata',   stall:'STALL 19 · INDIAN',  desc:'Dough stretched paper-thin, torn by hand, dipped in curry gravy.', price:'$2.20', video:'wKU_Yj3jMxg' }
 };
 const root = document.documentElement;
 const stallTag = document.getElementById('stall-tag');
@@ -352,6 +402,7 @@ let scrollLocked = false;
 
 function attemptSwitch(goingDown){
   if (scrollLocked) return;
+  if (document.getElementById('video-modal').classList.contains('active')) return;
   const nextIndex = orderIndex + (goingDown ? 1 : -1);
   if (nextIndex < 0 || nextIndex > order.length - 1) return;
 
@@ -433,6 +484,33 @@ requestAnimationFrame(()=>{
     if (!el) return;
     setTimeout(()=> el.classList.add('in'), delay);
   });
+});
+
+/* ---------- watch video modal ---------- */
+const watchBtn = document.getElementById('watch-btn');
+const videoModal = document.getElementById('video-modal');
+const videoModalBackdrop = document.getElementById('video-modal-backdrop');
+const videoModalClose = document.getElementById('video-modal-close');
+const videoModalIframe = document.getElementById('video-modal-iframe');
+
+function openVideoModal(){
+  const key = order[orderIndex];
+  const videoId = data[key] && data[key].video;
+  if (!videoId) return;
+  videoModalIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+  videoModal.classList.add('active');
+}
+
+function closeVideoModal(){
+  videoModal.classList.remove('active');
+  videoModalIframe.src = ''; // stop playback
+}
+
+watchBtn.addEventListener('click', openVideoModal);
+videoModalBackdrop.addEventListener('click', closeVideoModal);
+videoModalClose.addEventListener('click', closeVideoModal);
+window.addEventListener('keydown', (e)=>{
+  if (e.key === 'Escape' && videoModal.classList.contains('active')) closeVideoModal();
 });
 </script>
 </body>
